@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Welcome to ChughtaiLibrary Downloader!</h1>
+      <h2>Made by Hashir and Taha</h2>
+
+      <div class="row">
+        <a href="https://dl.chughtailibrary.com/files/repository/book_quest/" target="_blank">
+          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
+        </a>
+        <!-- <a
+          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+          target="_blank"
+        >
+          <img
+            src="/assets/javascript.svg"
+            class="logo vanilla"
+            alt="JavaScript logo"
+          /> -->
+        </a>
+      </div>
+
+      <p>Click on the above image to be transfered to chughtailibrary</p>
+
+      <form class="row" id="url-form">
+        <input id="url-input" placeholder="Enter a url..." />
+        <button type="submit">Enter</button>
+      </form>
+
+      <br>
+      
+      <form class="row" id="check-boxes">
+        <input type="checkbox" id="DownloadPdfs" name="DownloadPdfs" value="no">
+        <label for="DownloadPdfs">Download PDFs</label><br>
+        <input type="checkbox" id="DownloadImages" name="DownloadImages" value="yes">
+        <label for="DownloadImages">Download Images</label><br>
+        <input type="checkbox" id="ScanSubfolders" name="ScanSubfolders" value="yes">
+        <label for="ScanSubfolders">Scan Subfolders</label><br>
+      </form>
+
+      <br>
+
+      <p id="url-msg"></p>
+    </div>
+  </body>
+</html>
