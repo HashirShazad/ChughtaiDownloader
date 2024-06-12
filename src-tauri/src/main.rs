@@ -212,8 +212,8 @@ fn create_directory_if_it_does_not_exist(directory_path: &str) {
 async fn url_entered(url: &str, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
     println!("img:{} pdf:{} fol{}", img_box_checked, pdf_box_checked, subfolder_box_checked);
 
-    // let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await?;
-    //, download_imgs:bool, download_pdfs:bool, scan_subfolders:bool
+    // let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
+    //download_imgs:bool, download_pdfs:bool, scan_subfolders:bool
     //println!("IMGS: {} PDFS: {} SUB: {}", download_imgs, download_pdfs, scan_subfolders);
     Ok(format!("Sending request to {}", url))
 }
