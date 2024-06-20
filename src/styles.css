@@ -72,10 +72,14 @@ button {
 
 button {
   cursor: pointer;
+  will-change: filter;
+  transition: 0.75s;
 }
 
-button:hover {
+/* Enter button  */
+button:hover { 
   border-color: #396cd8;
+  filter: drop-shadow(0 0 1.2em orange);
 }
 button:active {
   border-color: #396cd8;
@@ -87,8 +91,43 @@ button {
   outline: none;
 }
 
-#greet-input {
-  margin-right: 5px;
+#url-input {
+  width: 600px;
+  will-change: filter;
+  transition: 0.75s;
+  margin-right: 15px;
+  size-adjust: 10px;
+}
+#url-input:hover{
+  border-color: #d8a039;
+  filter: drop-shadow(0 0 2em #24c8db);
+}
+#DownloadPdfs{
+  will-change: filter;
+  transition: 0.75s;
+  margin-left: 15px;
+}
+#DownloadPdfs:hover{
+  border-color: #396cd8;
+  filter: drop-shadow(0 0 1em orange);
+}
+#DownloadImages{
+  will-change: filter;
+  transition: 0.75s;
+  margin-left: 15px;
+}
+#DownloadImages:hover{
+  border-color: #396cd8;
+  filter: drop-shadow(0 0 1em orange);
+}
+#ScanSubfolders{
+  will-change: filter;
+  transition: 0.75s;
+  margin-left: 15px;
+}
+#ScanSubfolders:hover{
+  border-color: #396cd8;
+  filter: drop-shadow(0 0 1em orange);
 }
 
 @media (prefers-color-scheme: dark) {

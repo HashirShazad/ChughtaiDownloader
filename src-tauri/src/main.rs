@@ -10,7 +10,6 @@ use std::io;
 use std::io::BufReader;
 use std::time::Instant;
 use std::path::Path;
-use select::document::Document; 
 
 // use(s)
 use futures::stream::StreamExt;
@@ -20,6 +19,10 @@ use colored::Colorize;
 use tokio::sync::broadcast::error::SendError;
 use scraper::{Html, Selector};
 use colored::*;
+use futures::future::{BoxFuture, FutureExt};
+use futures::lock::Mutex;
+use select::document::Document;
+
 
 async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs:bool, scan_subfolders:bool) -> Result<Option<String>, Box<dyn std::error::Error>> {
     println!("URL : {}", url.bold().blink()); // Print the URL
@@ -207,22 +210,40 @@ fn create_directory_if_it_does_not_exist(directory_path: &str) {
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
-//                                                                                                         Result<String, ()>
+//                                                                                                 Return        Result<String, ()>
 #[tauri::command(rename_all = "snake_case")]
 async fn url_entered(url: &str, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
-    println!("img:{} pdf:{} fol{}", img_box_checked, pdf_box_checked, subfolder_box_checked);
+
+    println!("IMAGE:{} | PDF:{} | Folder:{} | URL: {}", img_box_checked, pdf_box_checked, subfolder_box_checked, url);
+
+
+    let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await?;
 
     // let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
     //download_imgs:bool, download_pdfs:bool, scan_subfolders:bool
     //println!("IMGS: {} PDFS: {} SUB: {}", download_imgs, download_pdfs, scan_subfolders);
-    Ok(format!("Sending request to {}", url))
+
+
+    Ok(format!("Sending request to: {}", url))
+}
+
+#[tauri::command]
+async fn test(test_var: &str) -> Result<String, ()>{
+    println!("TEST DONE:{}", test_var);
+    Ok(format!("AT UI: {}", test_var))
 }
 
 fn main() {
     // control::set_virtual_terminal(true).unwrap();
-    
+    println!("Hello, world!");
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![url_entered])
+        .invoke_handler(
+            tauri::generate_handler![
+                // all commands go here
+                url_entered,
+                test
+            ]
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
