@@ -3,26 +3,17 @@
 
 static CURRENT_DIRECTORY : &str = "Download/";
 // std(s)
-use std::io::{prelude::*, Bytes};
+use std::io::prelude::*;
 use std::fs::File;
 use std::fs;
-use std::io;
-use std::io::BufReader;
-use std::time::Instant;
 use std::path::Path;
 
 // use(s)
-use futures::stream::StreamExt;
 use reqwest::Client;
-use indicatif::{ProgressBar, ProgressStyle};
 use colored::Colorize;
-use tokio::sync::broadcast::error::SendError;
 use scraper::{Html, Selector};
-use colored::*;
-use futures::future::{BoxFuture, FutureExt};
-use futures::lock::Mutex;
-use select::document::Document;
-
+use serde::Serialize; // Required for returning values from Tauri commands
+use std::error::Error; // Required for error handling
 
 async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs:bool, scan_subfolders:bool) -> Result<Option<String>, Box<dyn std::error::Error>> {
     println!("URL : {}", url.bold().blink()); // Print the URL
@@ -62,7 +53,7 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
 
                             let href_link = url.to_string() + href_attr; // Link obtained by looking inside the url
                             let file_name = href_attr.split('/').last().unwrap_or("unknown");
-                            let file_type = href_attr.split('.').last().unwrap_or("unknown");
+                            let _file_type = href_attr.split('.').last().unwrap_or("unknown");
                             let folder = file_path.to_string() +
                                 (href_attr.split('/').take(2).collect::<Vec<&str>>().join("/")).as_str();
                             let folder_to_download = folder.replace(file_name, "");
@@ -76,9 +67,8 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
                             // else was here
                             if alt == is_directory {
                                 if scan_subfolders{
-                                    unsafe
-                                    {
-                                        fs::create_dir_all((CURRENT_DIRECTORY.to_string() + href_attr)).unwrap_or_else(|why| {
+
+                                        fs::create_dir_all(CURRENT_DIRECTORY.to_string() + href_attr).unwrap_or_else(|why| {
                                             println!("! {:?}", why);
                                         });
                                         // STILL Needs
@@ -87,7 +77,6 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
                                         // Bcz it can get infinitelty long so we use box::pin
                                         Box::pin(get_table((url.to_string() + href_attr).as_str(), folder.as_str(),
                                          download_pdfs, download_imgs, scan_subfolders)).await?; // Call get_table function with new url
-                                    }
                                 }
                                
                             }
@@ -212,19 +201,14 @@ fn create_directory_if_it_does_not_exist(directory_path: &str) {
 
 //                                                                                                 Return        Result<String, ()>
 #[tauri::command(rename_all = "snake_case")]
-async fn url_entered(url: &str, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
-
+async fn url_entered(url: String, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
     println!("IMAGE:{} | PDF:{} | Folder:{} | URL: {}", img_box_checked, pdf_box_checked, subfolder_box_checked, url);
 
 
-    let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await?;
+    let _ = get_table(&url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
+    
 
-    // let _ = get_table(url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
-    //download_imgs:bool, download_pdfs:bool, scan_subfolders:bool
-    //println!("IMGS: {} PDFS: {} SUB: {}", download_imgs, download_pdfs, scan_subfolders);
-
-
-    Ok(format!("Sending request to: {}", url))
+    Ok(format!("AT UI: {}", url))
 }
 
 #[tauri::command]
@@ -247,3 +231,4 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+

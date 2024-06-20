@@ -22,8 +22,8 @@ async function url_submitted() {
     subfolder_box_checked: scanSubfolders.checked
   };
 
-  urlMsgEl.textContent = await invoke("url_entered", { url, img_box_checked, pdf_box_checked, subfolder_box_checked });
-
+  await invoke("url_entered", { url, img_box_checked, pdf_box_checked, subfolder_box_checked });
+  urlMsgEl.textContent = "Completed!";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
