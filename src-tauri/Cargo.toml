@@ -25,7 +25,7 @@ scraper = "0.19.0"
 select = "0.6.0"
 table-extract = "0.2.3"
 tempfile = "3.10.1"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "full"] }
 ureq = "2.9.7"
 html_parser = "0.7.0"
 

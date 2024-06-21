@@ -10,11 +10,13 @@ use std::path::Path;
 use reqwest::Client;
 use colored::Colorize;
 use scraper::{Html, Selector};
+use tauri::api::Error as TauriError;
 use std::convert::From;
 
 
-#[tauri::command(rename_all = "snake_case")]
-async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs:bool, scan_subfolders:bool) -> Result<Option<String>, Box<dyn std::error::Error>> {
+
+
+async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs:bool, scan_subfolders:bool) -> Result<Option<String>, Box<dyn std::error::Error + Send + Sync>> {
     println!("URL : {}", url.bold().blink()); // Print the URL
 
     let response = ureq::get(url).call()?;
@@ -69,6 +71,7 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
                             // else was here
                             if alt == is_directory {
                                 if scan_subfolders{
+
                                         fs::create_dir_all(CURRENT_DIRECTORY.to_string() + href_attr).unwrap_or_else(|why| {
                                             println!("! {:?}", why);
                                         });
@@ -81,6 +84,7 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
                                 }
                                
                             }
+
                             else if alt == is_image{
                                 if download_imgs{
                                     download_file_from_url_with_folder(&href_link.as_str(), &folder_to_download).await?;
@@ -104,14 +108,59 @@ async fn get_table(url: &str, file_path: &str, download_pdfs:bool, download_imgs
                                 println!("{}{}",url.bright_yellow(), href_attr.bright_yellow());
                             }
                         }
+                        
+
+
                     }// if let Some(alt) = img.value().attr("alt")
                 }// for img
+
+                // <--------------> Code for http://www.tajalli.in/pdfs.asp <-------------------->
+                
+                // let file_name = href_attr.split('/').last().unwrap_or("unknown");
+                // let file_type = href_attr.split('.').last().unwrap_or("unknown");
+                // let folder = "Download/".to_string() +
+                //     (href_attr.split('/').take(2).collect::<Vec<&str>>().join("/")).as_str() + "/";
+                // if file_type == "asp"{
+
+                // }
+                // else {
+
+                //     let parent_url = url.replace("pdfs.asp", "");
+
+                //     let folder_to_create = folder.as_str();
+                //     create_directory_if_it_does_not_exist(&folder_to_create);
+                    
+                //     let file_to_download = parent_url + href_attr;
+
+                //     println!("URL inide href: {} | File Name: {} | File Type: {} | Folder {}, Link {}",
+                //         href_attr.bright_green(),
+                //         file_name.purple(),
+                //         file_type.bright_yellow(),
+                //         folder.red(),
+                //         file_to_download.cyan()
+                //     );
+
+                //     // if we fix this function the whole code will work for tajalli only
+                //     download_file_from_url_with_folder(file_to_download.as_str(), &folder).await?;
+                // };
+                
+
+                // This code will download files other than dl.chughtailinary.com
+                // download_file(text, file_name, file_type, path);
+                
             }// for href
+
+            // println!("{}", row.inner_html().bright_green());
+
         }// for row
+
+        // println!("{}" , table.inner_html().red());
+
     }// for table
+
     Ok(None) // return None
 }
-async fn download_file_from_url_with_folder(url : &str, input_path:&str) -> Result<(), Box<dyn std::error::Error>> {
+async fn download_file_from_url_with_folder(url : &str, input_path:&str) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     create_directory_if_it_does_not_exist(input_path);
 
@@ -155,16 +204,16 @@ fn create_directory_if_it_does_not_exist(directory_path: &str) {
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
 //                                                                                                 Return        Result<String, ()>
-// #[tauri::command(rename_all = "snake_case")]
-// async fn url_entered(url: String, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
-//     println!("IMAGE:{} | PDF:{} | Folder:{} | URL: {}", img_box_checked, pdf_box_checked, subfolder_box_checked, url);
+#[tauri::command(rename_all = "snake_case")]
+async fn url_entered(url: String, img_box_checked:bool, pdf_box_checked:bool, subfolder_box_checked:bool) -> Result<String, ()> {
+    println!("IMAGE:{} | PDF:{} | Folder:{} | URL: {}", img_box_checked, pdf_box_checked, subfolder_box_checked, url);
 
     
-//     let _ = get_table(&url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
+    let _ = get_table(&url, CURRENT_DIRECTORY, pdf_box_checked, img_box_checked, subfolder_box_checked).await;
     
 
-//     Ok(format!("AT UI: {}", url))
-// }
+    Ok(format!("AT UI: {}", url))
+}
 
 
 fn main() {
@@ -174,7 +223,7 @@ fn main() {
         .invoke_handler(
             tauri::generate_handler![
                 // all commands go here
-                get_table            
+                url_entered            
             ]
         )
         .run(tauri::generate_context!())
